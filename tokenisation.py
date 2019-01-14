@@ -1,4 +1,4 @@
-path = 'D:/Centrale/Scolaire/3A/RIW/Projet/friweb/Data/CACM/cacm.all'
+path = '/Users/Jihane/Desktop/Scolarité/3A/Friweb/Data/CACM/cacm.all'
 import re
 from math import log, exp
 
@@ -7,7 +7,7 @@ reg='\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]\;'
 
 '''Methods'''
 
-def tokenize(path):
+def create_lowercase_text(path):
     file_obj = open(path, 'r')
     lines = file_obj.readlines()
     I = None
@@ -40,22 +40,34 @@ def tokenize(path):
                 string_of_interesting_data += key_word
     return string_of_interesting_data.lower()
 
+def tokenize(text):
+    splitting = re.split(reg, text)
+    splitting[:] = [x for x in splitting if x != '']
+    return splitting
+
+def vocabulary(tokens):
+    return sorted(set(tokens))
+
+
 def ComputeLinearReg(lowercase_string_of_interesting_data):
     half_doc_of_interest = lowercase_string_of_interesting_data[:len(lowercase_string_of_interesting_data)//2]
     linear_reg = []
-    linear_reg.append([log(len(lowercase_string_of_interesting_data)),log(len(sorted(set(re.split(reg, lowercase_string_of_interesting_data)))))])
-    linear_reg.append([log(len(half_doc_of_interest)),log(len(sorted(set(re.split(reg, half_doc_of_interest)))))])
+    T1 = len(tokenize(lowercase_string_of_interesting_data))
+    M1=len(vocabulary(tokenize(lowercase_string_of_interesting_data)))
+    linear_reg.append([log(T1),log(M1)])
+    T2 = len(tokenize(half_doc_of_interest))
+    M2=len(vocabulary(tokenize(half_doc_of_interest)))
+    linear_reg.append([log(T2),log(M2)])
 
     beta = (linear_reg[1][1] - linear_reg[0][1])/(linear_reg[1][0] - linear_reg[0][0])
-    K = exp(linear_reg[1][1] - beta*linear_reg[1][0])
+    K = exp(1/2*(linear_reg[1][1] + linear_reg[0][1] - beta*(linear_reg[1][0]+linear_reg[0][0])))
     return beta, K
 
 ''' Q1'''
 
-lowercase_string_of_interesting_data = tokenize(path)
-splitting = re.split(reg, lowercase_string_of_interesting_data)
-splitting[:] = [x for x in splitting if x!='']
-vocab=sorted(set(splitting))
+lowercase_string_of_interesting_data = create_lowercase_text(path)
+
+vocab=vocabulary(tokenize(lowercase_string_of_interesting_data))
 
 '''Q2'''
 
