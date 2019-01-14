@@ -1,8 +1,8 @@
-path = '/Users/Jihane/Desktop/Scolarité/3A/Friweb/Data/CACM/cacm.all'
 import re
+import os
 from math import log, exp
 
-
+path = os.getcwd()+'\\Data/CACM/cacm.all'
 reg='\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]\;'
 
 '''Methods'''
