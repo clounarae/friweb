@@ -1,6 +1,9 @@
 path = '/Users/Jihane/Desktop/Scolarité/3A/Friweb/Data/CACM/cacm.all'
 import re
 from math import log, exp
+import nltk
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 reg='\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]\;'
@@ -66,8 +69,9 @@ def ComputeLinearReg(lowercase_string_of_interesting_data):
 ''' Q1'''
 
 lowercase_string_of_interesting_data = create_lowercase_text(path)
+tokenized_text = tokenize(lowercase_string_of_interesting_data)
 
-vocab=vocabulary(tokenize(lowercase_string_of_interesting_data))
+vocab=vocabulary(tokenized_text)
 
 '''Q2'''
 
@@ -83,3 +87,21 @@ print("La loi de Heap : b = %f,  K = %f" %(beta_reg, K_reg))
 '''Q4'''
 
 print("Pour un million : %f " %(K_reg*((10**6)**beta_reg)))
+
+'''Q5'''
+word_freq = sorted([tokenized_text.count(w) for w in vocab], reverse=True)    #frequency
+x = [i+1 for i in range(len(word_freq))]  #rank
+print("Drawing graph")
+plt.plot(x,word_freq, color='r')
+plt.xlabel("rank")
+plt.ylabel("frequency")
+plt.title("Frequency depending on rank")
+plt.show()
+print("Drawing log graph")
+plt.plot(np.log(x),np.log(word_freq), color='b')
+plt.xlabel("log(rank)")
+plt.ylabel("log(frequency)")
+plt.title("log(Frequency) depending on log(rank)")
+plt.show()
+print("process finished successfully !")
+
