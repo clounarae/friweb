@@ -104,4 +104,3 @@ plt.ylabel("log(frequency)")
 plt.title("log(Frequency) depending on log(rank)")
 plt.show()
 print("process finished successfully !")
-
