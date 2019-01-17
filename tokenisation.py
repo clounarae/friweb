@@ -1,11 +1,11 @@
-path = '/Users/Jihane/Desktop/Scolarité/3A/Friweb/Data/CACM/cacm.all'
 import re
+import os
 from math import log, exp
 import nltk
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+path = os.getcwd()+'\\Data/CACM/cacm.all'
 reg='\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]\;'
 
 '''Methods'''
