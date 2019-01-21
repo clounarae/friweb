@@ -5,7 +5,7 @@ import nltk
 import numpy as np
 import matplotlib.pyplot as plt
 
-path = os.getcwd()+'\\Data\\CACM\\cacm.all'
+path = os.getcwd()+'/Data/CACM/cacm.all'
 reg='\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]|\;|\?|\!|\''
 
 '''Methods'''
@@ -97,32 +97,131 @@ print("La loi de Heap : b = %f,  K = %f" %(beta_reg, K_reg))
 print("Pour un million : %f " %(K_reg*((10**6)**beta_reg)))
 
 '''Q5'''
-
-word_freq = sorted([tokenized_text.count(w) for w in vocab], reverse=True)    #frequency
-x = [i+1 for i in range(len(word_freq))]  #rank
-print("Drawing graph")
-plt.plot(x,word_freq, color='r')
-plt.xlabel("rank")
-plt.ylabel("frequency")
-plt.title("Frequency depending on rank")
-plt.show()
-print("Drawing log graph")
-plt.plot(np.log(x),np.log(word_freq), color='b')
-plt.xlabel("log(rank)")
-plt.ylabel("log(frequency)")
-plt.title("log(Frequency) depending on log(rank)")
-plt.show()
-print("process finished successfully !")
-
-
-''' index '''
-'''     Done pour CACM en un seul bloc (en mémoire). Il faut trouver une solution pour CS276.
-'''
-print('Index : ')
+#
+# word_freq = sorted([tokenized_text.count(w) for w in vocab], reverse=True)    #frequency
+# x = [i+1 for i in range(len(word_freq))]  #rank
+# print("Drawing graph")
+# plt.plot(x,word_freq, color='r')
+# plt.xlabel("rank")
+# plt.ylabel("frequency")
+# plt.title("Frequency depending on rank")
+# plt.show()
+# print("Drawing log graph")
+# plt.plot(np.log(x),np.log(word_freq), color='b')
+# plt.xlabel("log(rank)")
+# plt.ylabel("log(frequency)")
+# plt.title("log(Frequency) depending on log(rank)")
+# plt.show()
+# print("process finished successfully !")
+#
+#
+# ''' index '''
+# '''     Done pour CACM en un seul bloc (en mémoire). Il faut trouver une solution pour CS276.
+# '''
+# print('Index : ')
 inverted_index = create_inverted_index(path)
-print('inverted_index[\'was\'] : ', inverted_index['was'])
-print('inverted_index[\'police\'] : ', inverted_index['police'])
+# print('inverted_index[\'was\'] : ', inverted_index['was'])
+# print('inverted_index[\'police\'] : ', inverted_index['police'])
 
 ''' 2.2.1 Index booléen '''
 
-reg_op = 'AND|OR|\(|\)'
+
+def intersection(lst1, lst2):
+    lst3 = [value for value in lst1 if value in lst2]
+    return lst3
+
+def boolean_research_V0(client_request):
+    request = tokenize(client_request)
+    documents = []
+    forbidden_docs = []
+    if(len(request) == 1):
+        documents = inverted_index[request[0]]
+    else :
+        for i in range(len(request)):
+            if(request[i] in ['AND', 'OR', 'NOT']):
+                pass
+            else:
+                if(i==0):
+                    documents += inverted_index[request[i]]
+                else:
+                    previous_term = request[i-1]
+                    if previous_term == 'OR':
+                        documents += inverted_index[request[i]]
+                    elif previous_term == 'AND':
+                        documents = intersection(documents, inverted_index[request[i]])
+                    elif previous_term == 'NOT':
+                        if request[i-2] == 'AND':
+                            forbidden_docs += inverted_index[request[i]]
+    if len(forbidden_docs)>0:
+        for docId in documents:
+            if docId in forbidden_docs:
+                documents.remove(docId)
+    return documents
+
+##def boolean_research(client_request):
+#    request = tokenize(client_request)
+#    AND_indexes = [index for index, value in enumerate(request) if value == 'AND']
+#    AND_words = []
+#    OR_words = []
+#    for index in AND_indexes:
+#        if index > 1:
+#            if request[index-2] != 'NOT':
+#                AND_words.append(request[index-1])
+#            else :
+#                return 'yay'
+def get_all_doc_Id(path):
+    file_obj = open(path, 'r')
+    lines = file_obj.readlines()
+    listDocId=[]
+    for (i,line) in enumerate(lines):
+        if line[0] == '.':
+            if line[1] == 'I':
+                listDocId.append(int(line[3:]))
+    return listDocId
+
+
+
+def boolean_research(client_request):
+    request = tokenize(client_request)
+    #handling AND elements
+    forbidden_doc=[]
+    documents=[]
+    while(next((operator for operator in request if operator == 'AND'), False)):
+        i = request.index('AND')
+        if(request[i-2]=='NOT'):
+            forbidden_doc+=inverted_index[request[i-1]]
+        else:
+            documents+=inverted_index[request[i-1]]
+        if(request[i+1]=='NOT'):
+            forbidden_doc+=inverted_index[request[i+2]]
+        else:
+            if(documents != []):
+                documents=intersection(documents,inverted_index[request[i+1]])
+            else:
+                documents+=inverted_index[request[i+1]]
+        if len(documents)==0:
+            documents=get_all_doc_Id(path)
+        if len(forbidden_doc) > 0:
+            for docId in documents:
+                if docId in forbidden_doc:
+                    documents.remove(docId)
+        return documents
+
+
+'''request1 = 'mechanical AND pragmatics'
+request2 = 'translation AND mechanical'
+request3 = 'mechanical AND translation OR NOT pragmatics'
+print('mechanical : ',inverted_index['mechanical'])
+print('pragmatics :', inverted_index['pragmatics'])
+print('translation : ', inverted_index['translation'] )
+print('list of documents', boolean_research_V0(request1))
+print('list of documents', boolean_research_V0(request2))
+print('list of docs', boolean_research_V0(request3))
+print('query empty', boolean_research_V0('hjljk'))
+'''
+request1 = 'NOT mechanical AND pragmatics'
+print(boolean_research(request1))
+print('mechanical : ',inverted_index['mechanical'])
+print('pragmatics :', inverted_index['pragmatics'])
+
+
