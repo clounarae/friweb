@@ -28,15 +28,15 @@ print("Pour un million : %f " %(K_reg*((10**6)**beta_reg)))
 
 '''Q5'''
 
-plot_frequecy_distribution(tokenized_text)
+#plot_frequecy_distribution(tokenized_text)
 
 ''' index '''
 '''     Done pour CACM en un seul bloc (en mémoire). Il faut trouver une solution pour CS276.
 '''
 print('Index : ')
 inverted_index = create_inverted_index(path)
-print('inverted_index[\'was\'] : ', inverted_index['was'])
-print('inverted_index[\'police\'] : ', inverted_index['police'])
+print('inverted_index[\'complex\'] : ', inverted_index['complex'])
+print('inverted_index[\'effective\'] : ', inverted_index['effective'])
 
 ''' 2.2.1 Index booléen '''
 

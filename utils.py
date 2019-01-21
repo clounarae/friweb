@@ -1,7 +1,7 @@
-from math import log, exp
+from math import log, log10, exp
 import numpy as np
 import matplotlib.pyplot as plt
-from text_processing import create_lowercase_text, tokenize, vocabulary, select_text_from_doc_part
+from text_processing import create_lowercase_text, tokenize, vocabulary, select_text_from_doc_part, get_number_of_documents
 
 def create_inverted_index(path):
     file_obj = open(path, 'r')
@@ -12,8 +12,8 @@ def create_inverted_index(path):
         if line[0] == '.':
             if line[1] == 'I':
                 docID = int(line[3:])
-            elif line[1] in ['T','W','K'] and docID != None:
-                for word in vocabulary(tokenize(select_text_from_doc_part(i, lines).lower())):
+            elif (line[1] in ["T","W","B","A","N","X","K"]) and (docID != None):
+                for word in vocabulary(tokenize(select_text_from_doc_part(i, lines))):
                     try :
                         inverted_index[word].append(docID)
                     except :
@@ -21,6 +21,44 @@ def create_inverted_index(path):
     for word in inverted_index.keys():
         inverted_index[word] = sorted(list(set(inverted_index[word])))
     return inverted_index
+
+def split_documents(path):
+    file_obj = open(path, 'r')
+    lines = file_obj.readlines()
+    documents_splitted = {}
+    docID = None
+    for (i,line) in enumerate(lines):
+        if line[0] == '.':
+            if line[1] == 'I':
+                docID = int(line[3:])
+            elif (line[1] in ["T","W","B","A","N","X","K"]) and (docID != None):
+                try:
+                    documents_splitted[docID] += tokenize(select_text_from_doc_part(i, lines))
+                except:
+                    documents_splitted[docID] = tokenize(select_text_from_doc_part(i, lines))
+    return documents_splitted
+
+def log_term_freq_in_doc(term, docID, doc_dict):
+    term_freq = 0
+    try:
+        term_freq = doc_dict[docID].count(term)
+    except:
+        term_freq = 0  #doc n'existe pas
+    if term_freq > 0:
+        return 1 + log10(term_freq)
+    else:
+        return 0
+
+def inverted_document_freq(term, inverted_index, path)
+    n_docs_with_term = 0
+    try:
+        n_docs_with_term = len(inverted_index[term])
+    except:
+        return 0      #terme n'existe pas dans la collection
+    return log10(get_number_of_documents(path) / n_docs_with_term)
+
+def tf_idf_weight(docID, term, doc_dict, inverted_index, path):
+    return inverted_document_freq(term, inverted_index, path) * log_term_freq_in_doc(term, docID, doc_dict)
 
 def compute_linear_reg(lowercase_string_of_interesting_data):
     half_doc_of_interest = lowercase_string_of_interesting_data[:len(lowercase_string_of_interesting_data)//2]
