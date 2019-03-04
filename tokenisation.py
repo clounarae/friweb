@@ -5,7 +5,7 @@ import nltk
 import numpy as np
 import matplotlib.pyplot as plt
 
-path = './Data/CACM/cacm.all'
+path = "./Data/CACM/cacm.all"
 reg='\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]|\;|\?|\!|\''
 
 '''Methods'''
@@ -173,17 +173,19 @@ import pdb
 def boolean_research(client_request, path_client = path):
     all_doc_id = get_all_doc_Id(path_client)
     request = tokenize(client_request)
-    #handling AND elements
     final_docs=[]
+    documents = []
+    #forbidden_doc = []
+    #handling AND elements first
     while(next((operator for operator in request if operator == 'AND'), False)):
         index_treated = []
-        forbidden_doc = []
-        documents = []
+        forbidden_doc = list(set())
         i = request.index('AND')
+        print('AND loop, i:', i, ' request : ', request)
         if(request[i-2]=='NOT'):
             index_treated =[i-2,i-1,i]
             forbidden_doc+=inverted_index[request[i-1]]
-        else:
+        elif(request[i-2]!='NOT'):
             if type(request[i-1])==str: # mot AND ..
                 doc_treated= inverted_index[request[i - 1]]
             else: # [ liste doc ] AND ..
@@ -193,7 +195,7 @@ def boolean_research(client_request, path_client = path):
         if(request[i+1]=='NOT'):
             index_treated.extend((i+1,i+2))
             forbidden_doc+=inverted_index[request[i+2]]
-        else:
+        elif(request[i+1]!='NOT'):
             index_treated.append(i+1)
             if type(request[i+1])==str:
                 doc_treated= inverted_index[request[i + 1]]
@@ -204,25 +206,31 @@ def boolean_research(client_request, path_client = path):
             else:
                 documents+=doc_treated
         if len(forbidden_doc) > 0: # Removing forbidden docs from results
+            print('forbidden docs',forbidden_doc)
+            print('documents before removal', documents)
             if len(documents) == 0:
-                documents = all_doc_id
+                documents = all_doc_id.copy()
+
             for docId in documents:
                 if docId in forbidden_doc:
+                    print('docID', docId)
                     documents.remove(docId)
         request.insert(index_treated[0],documents)
         for j in range(len(index_treated)):
             request.pop(index_treated[1]) #
+        print('documents after removal', documents, ' and request is now :', request)
         final_docs=documents
-
+    #Handling OR elements
     while(next((operator for operator in request if operator == 'OR'), False)):
         index_treated = []
         forbidden_doc = []
-        documents = []
         i = request.index('OR')
         if(request[i-2]=='NOT'):
             index_treated =[i-2,i-1,i]
-            documents += all_doc_id.remove(docId for docId in inverted_index[request[i-1]])
-            #forbidden_doc+=inverted_index[request[i-1]]
+            all_docs = all_doc_id.copy()
+            for docId in inverted_index[request[i - 1]]:
+                all_docs.remove(docId)
+            documents+= all_docs
         else:
             if type(request[i-1])==str:
                 doc_treated= inverted_index[request[i - 1]]
@@ -232,11 +240,10 @@ def boolean_research(client_request, path_client = path):
             index_treated=[i-1,i]
         if(request[i+1]=='NOT'):
             index_treated.extend((i+1,i+2))
-            #if forbidden_doc !=[]:
-             #   forbidden_doc=intersection(forbidden_doc,inverted_index[request[i+2]])
-            #else:
-            documents += all_doc_id.remove(docId for docId in inverted_index[request[i + 2]])
-            #forbidden_doc+=inverted_index[request[i+2]]
+            all_doc = all_doc_id.copy()
+            for docId in inverted_index[request[i + 2]]:
+                all_doc.remove(docId)
+            documents+= all_doc
         else:
             index_treated.append(i+1)
             if type(request[i+1])==str:
@@ -244,21 +251,11 @@ def boolean_research(client_request, path_client = path):
             else:
                 doc_treated = request[i+1]
             documents+=doc_treated
-        '''
-        if len(forbidden_doc) > 0:
-            if len(documents) == 0:
-                documents = all_doc_id
-            for docId in documents:
-                if docId in forbidden_doc:
-                    documents.remove(docId)
-                    '''
         request.insert(index_treated[0],documents)
         for j in range(len(index_treated)):
-            request.pop(index_treated[1]) # ?? Je comprends pas trop
+            request.pop(index_treated[1])
         final_docs=documents
-
-
-    return final_docs
+    return list(set(final_docs))
 
 
 '''request1 = 'mechanical AND pragmatics'
@@ -278,8 +275,29 @@ print(boolean_research(request1))
 print('mechanical : ',inverted_index['mechanical'])
 print('pragmatics :', inverted_index['pragmatics'])
 print('translation : ', inverted_index['translation'] )
+
+
+request = 'mechanical AND pragmatics'
+print(request)
+print(boolean_research(request))
+
+request_NOT = 'mechanical AND NOT pragmatics'
+print(request_NOT)
+print(boolean_research(request_NOT))
+
+request_or = 'mechanical OR pragmatics'
+print(request_or)
+print(boolean_research(request_or))
 '''
-request = 'mechanical AND NOT pragmatics'
 print('mechanical : ',inverted_index['mechanical'])
 print('pragmatics :', inverted_index['pragmatics'])
-print(boolean_research(request))
+print('police : ', inverted_index['police'])
+request_andNot = 'pragmatics AND NOT pragmatics AND police'
+request_orNot = 'NOT mechanical OR NOT pragmatics AND NOT pragmatics AND police'
+#print(request_orNot)
+#print(boolean_research(request_orNot))
+print(request_andNot)
+print(boolean_research(request_andNot))
+
+print(boolean_research('NOT police AND police AND police'))
+
