@@ -6,9 +6,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 path = "./Data/CACM/cacm.all"
-reg='\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]|\;|\?|\!|\''
+reg = '\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]|\;|\?|\!|\''
 
 '''Methods'''
+
 
 def create_lowercase_text(path):
     file_obj = open(path, 'r')
@@ -20,9 +21,10 @@ def create_lowercase_text(path):
             if line[1] == "I":
                 I = line[3:]
                 string_of_interesting_data += I
-            elif line[1] in ["T","W","K"]:
+            elif line[1] in ["T", "W", "K"]:
                 string_of_interesting_data += select_text_from_doc_part(i, lines)
     return string_of_interesting_data.lower()
+
 
 def select_text_from_doc_part(i, lines):
     j = i + 1
@@ -32,28 +34,31 @@ def select_text_from_doc_part(i, lines):
         j = j + 1
     return text_block
 
+
 def tokenize(text):
     splitting = re.split(reg, text)
     splitting[:] = [x for x in splitting if x != '']
     return splitting
 
+
 def vocabulary(tokens):
     return sorted(set(tokens))
+
 
 def create_inverted_index(path):
     file_obj = open(path, 'r')
     lines = file_obj.readlines()
     inverted_index = {}
     docID = None
-    for (i,line) in enumerate(lines):
+    for (i, line) in enumerate(lines):
         if line[0] == '.':
             if line[1] == 'I':
                 docID = int(line[3:])
-            elif line[1] in ['T','W','K'] and docID != None:
+            elif line[1] in ['T', 'W', 'K'] and docID != None:
                 for word in vocabulary(tokenize(select_text_from_doc_part(i, lines).lower())):
-                    try :
+                    try:
                         inverted_index[word].append(docID)
-                    except :
+                    except:
                         inverted_index[word] = [docID]
     for word in inverted_index.keys():
         inverted_index[word] = sorted(list(set(inverted_index[word])))
@@ -61,40 +66,41 @@ def create_inverted_index(path):
 
 
 def ComputeLinearReg(lowercase_string_of_interesting_data):
-    half_doc_of_interest = lowercase_string_of_interesting_data[:len(lowercase_string_of_interesting_data)//2]
+    half_doc_of_interest = lowercase_string_of_interesting_data[:len(lowercase_string_of_interesting_data) // 2]
     linear_reg = []
     T1 = len(tokenize(lowercase_string_of_interesting_data))
-    M1=len(vocabulary(tokenize(lowercase_string_of_interesting_data)))
-    linear_reg.append([log(T1),log(M1)])
+    M1 = len(vocabulary(tokenize(lowercase_string_of_interesting_data)))
+    linear_reg.append([log(T1), log(M1)])
     T2 = len(tokenize(half_doc_of_interest))
-    M2=len(vocabulary(tokenize(half_doc_of_interest)))
-    linear_reg.append([log(T2),log(M2)])
+    M2 = len(vocabulary(tokenize(half_doc_of_interest)))
+    linear_reg.append([log(T2), log(M2)])
 
-    beta = (linear_reg[1][1] - linear_reg[0][1])/(linear_reg[1][0] - linear_reg[0][0])
-    K = exp(1/2*(linear_reg[1][1] + linear_reg[0][1] - beta*(linear_reg[1][0]+linear_reg[0][0])))
+    beta = (linear_reg[1][1] - linear_reg[0][1]) / (linear_reg[1][0] - linear_reg[0][0])
+    K = exp(1 / 2 * (linear_reg[1][1] + linear_reg[0][1] - beta * (linear_reg[1][0] + linear_reg[0][0])))
     return beta, K
+
 
 ''' Q1'''
 
 lowercase_string_of_interesting_data = create_lowercase_text(path)
 tokenized_text = tokenize(lowercase_string_of_interesting_data)
 
-vocab=vocabulary(tokenized_text)
+vocab = vocabulary(tokenized_text)
 
 '''Q2'''
 
-print("Le vocabulaire de l'ensemble a %i éléments distincts." %(len(vocab)))
+print("Le vocabulaire de l'ensemble a %i éléments distincts." % (len(vocab)))
 
 '''Q3'''
 
 beta_reg = None
 K_reg = None
 beta_reg, K_reg = ComputeLinearReg(lowercase_string_of_interesting_data)
-print("La loi de Heap : b = %f,  K = %f" %(beta_reg, K_reg))
+print("La loi de Heap : b = %f,  K = %f" % (beta_reg, K_reg))
 
 '''Q4'''
 
-print("Pour un million : %f " %(K_reg*((10**6)**beta_reg)))
+print("Pour un million : %f " % (K_reg * ((10 ** 6) ** beta_reg)))
 
 '''Q5'''
 #
@@ -130,39 +136,41 @@ def intersection(lst1, lst2):
     lst3 = [value for value in lst1 if value in lst2]
     return lst3
 
+
 def boolean_research_V0(client_request):
     request = tokenize(client_request)
     documents = []
     forbidden_docs = []
-    if(len(request) == 1):
+    if (len(request) == 1):
         documents = inverted_index[request[0]]
-    else :
+    else:
         for i in range(len(request)):
-            if(request[i] in ['AND', 'OR', 'NOT']):
+            if (request[i] in ['AND', 'OR', 'NOT']):
                 pass
             else:
-                if(i==0):
+                if (i == 0):
                     documents += inverted_index[request[i]]
                 else:
-                    previous_term = request[i-1]
+                    previous_term = request[i - 1]
                     if previous_term == 'OR':
                         documents += inverted_index[request[i]]
                     elif previous_term == 'AND':
                         documents = intersection(documents, inverted_index[request[i]])
                     elif previous_term == 'NOT':
-                        if request[i-2] == 'AND':
+                        if request[i - 2] == 'AND':
                             forbidden_docs += inverted_index[request[i]]
-    if len(forbidden_docs)>0:
+    if len(forbidden_docs) > 0:
         for docId in documents:
             if docId in forbidden_docs:
                 documents.remove(docId)
     return documents
 
+
 def get_all_doc_Id(path):
     file_obj = open(path, 'r')
     lines = file_obj.readlines()
-    listDocId=[]
-    for (i,line) in enumerate(lines):
+    listDocId = []
+    for (i, line) in enumerate(lines):
         if line[0] == '.':
             if line[1] == 'I':
                 listDocId.append(int(line[3:]))
@@ -170,134 +178,101 @@ def get_all_doc_Id(path):
 
 
 import pdb
-def boolean_research(client_request, path_client = path):
+
+
+def boolean_research(client_request, path_client=path):
     all_doc_id = get_all_doc_Id(path_client)
     request = tokenize(client_request)
-    final_docs=[]
+    final_docs = []
     documents = []
-    #forbidden_doc = []
-    #handling AND elements first
-    while(next((operator for operator in request if operator == 'AND'), False)):
+
+    # handling AND elements first
+    while (next((operator for operator in request if operator == 'AND'), False)):
         index_treated = []
         forbidden_doc = list(set())
         i = request.index('AND')
-        print('AND loop, i:', i, ' request : ', request)
-        if(request[i-2]=='NOT'):
-            index_treated =[i-2,i-1,i]
-            forbidden_doc+=inverted_index[request[i-1]]
-        elif(request[i-2]!='NOT'):
-            if type(request[i-1])==str: # mot AND ..
-                doc_treated= inverted_index[request[i - 1]]
-            else: # [ liste doc ] AND ..
-                doc_treated = request[i-1]
-            documents += doc_treated
-            index_treated=[i-1,i]
-        if(request[i+1]=='NOT'):
-            index_treated.extend((i+1,i+2))
-            forbidden_doc+=inverted_index[request[i+2]]
-        elif(request[i+1]!='NOT'):
-            index_treated.append(i+1)
-            if type(request[i+1])==str:
-                doc_treated= inverted_index[request[i + 1]]
+        if (request[i - 2] == 'NOT'):
+            index_treated = [i - 2, i - 1, i]
+            forbidden_doc.extend(element for element in inverted_index[request[i - 1]] if element not in forbidden_doc)
+        elif (request[i - 2] != 'NOT'):
+            if type(request[i - 1]) == str:  # mot AND ..
+                doc_treated = inverted_index[request[i - 1]]
+            else:  # [ liste doc ] AND ..
+                doc_treated = request[i - 1]
+            documents.extend(element for element in doc_treated if element not in documents)
+            index_treated = [i - 1, i]
+        if (request[i + 1] == 'NOT'):
+            index_treated.extend((i + 1, i + 2))
+            forbidden_doc.extend(element for element in inverted_index[request[i + 2]] if element not in forbidden_doc)
+        elif (request[i + 1] != 'NOT'):
+            index_treated.append(i + 1)
+            if type(request[i + 1]) == str:
+                doc_treated = inverted_index[request[i + 1]]
             else:
-                doc_treated = request[i+1]
-            if(documents != []):
-                documents=intersection(documents,doc_treated)
+                doc_treated = request[i + 1]
+            if (documents != []):
+                documents = intersection(documents, doc_treated)
             else:
-                documents+=doc_treated
-        if len(forbidden_doc) > 0: # Removing forbidden docs from results
-            print('forbidden docs',forbidden_doc)
-            print('documents before removal', documents)
+                documents.extend(element for element in doc_treated if element not in documents)
+        if len(forbidden_doc) > 0:  # Removing forbidden docs from results
             if len(documents) == 0:
-                documents = all_doc_id.copy()
+                documents = all_doc_id.copy() #??? pourquoi ?
 
             for docId in documents:
                 if docId in forbidden_doc:
-                    print('docID', docId)
                     documents.remove(docId)
-        request.insert(index_treated[0],documents)
+        request.insert(index_treated[0], documents)
         for j in range(len(index_treated)):
-            request.pop(index_treated[1]) #
-        print('documents after removal', documents, ' and request is now :', request)
-        final_docs=documents
-    #Handling OR elements
-    while(next((operator for operator in request if operator == 'OR'), False)):
+            request.pop(index_treated[1])  #
+        final_docs = documents
+    # Handling OR elements
+    while (next((operator for operator in request if operator == 'OR'), False)):
         index_treated = []
-        forbidden_doc = []
         i = request.index('OR')
-        if(request[i-2]=='NOT'):
-            index_treated =[i-2,i-1,i]
+        if (request[i - 2] == 'NOT'):
+            index_treated = [i - 2, i - 1, i]
             all_docs = all_doc_id.copy()
             for docId in inverted_index[request[i - 1]]:
                 all_docs.remove(docId)
-            documents+= all_docs
+            documents.extend(element for element in all_docs if element not in documents)
         else:
-            if type(request[i-1])==str:
-                doc_treated= inverted_index[request[i - 1]]
+            if type(request[i - 1]) == str:
+                doc_treated = inverted_index[request[i - 1]]
             else:
-                doc_treated = request[i-1]
-            documents += doc_treated
-            index_treated=[i-1,i]
-        if(request[i+1]=='NOT'):
-            index_treated.extend((i+1,i+2))
+                doc_treated = request[i - 1]
+            documents.extend(element for element in doc_treated if element not in documents)
+            index_treated = [i - 1, i]
+        if (request[i + 1] == 'NOT'):
+            index_treated.extend((i + 1, i + 2))
             all_doc = all_doc_id.copy()
             for docId in inverted_index[request[i + 2]]:
                 all_doc.remove(docId)
-            documents+= all_doc
+            documents.extend(element for element in all_doc if element not in documents)
         else:
-            index_treated.append(i+1)
-            if type(request[i+1])==str:
-                doc_treated= inverted_index[request[i + 1]]
+            index_treated.append(i + 1)
+            if type(request[i + 1]) == str:
+                doc_treated = inverted_index[request[i + 1]]
             else:
-                doc_treated = request[i+1]
-            documents+=doc_treated
-        request.insert(index_treated[0],documents)
+                doc_treated = request[i + 1]
+            documents.extend(element for element in doc_treated if element not in documents)
+        request.insert(index_treated[0], documents)
         for j in range(len(index_treated)):
             request.pop(index_treated[1])
-        final_docs=documents
-    return list(set(final_docs))
+        final_docs = documents
+    return final_docs
 
-
-'''request1 = 'mechanical AND pragmatics'
-request2 = 'translation AND mechanical'
-request3 = 'mechanical AND translation OR NOT pragmatics'
-print('mechanical : ',inverted_index['mechanical'])
-print('pragmatics :', inverted_index['pragmatics'])
-print('translation : ', inverted_index['translation'] )
-print('list of documents', boolean_research_V0(request1))
-print('list of documents', boolean_research_V0(request2))
-print('list of docs', boolean_research_V0(request3))
-print('query empty', boolean_research_V0('hjljk'))
-'''
-''' 
-request1 = 'NOT pragmatics OR mechanical'
-print(boolean_research(request1))
-print('mechanical : ',inverted_index['mechanical'])
-print('pragmatics :', inverted_index['pragmatics'])
-print('translation : ', inverted_index['translation'] )
-
-
-request = 'mechanical AND pragmatics'
-print(request)
-print(boolean_research(request))
-
-request_NOT = 'mechanical AND NOT pragmatics'
-print(request_NOT)
-print(boolean_research(request_NOT))
-
-request_or = 'mechanical OR pragmatics'
-print(request_or)
-print(boolean_research(request_or))
-'''
-print('mechanical : ',inverted_index['mechanical'])
-print('pragmatics :', inverted_index['pragmatics'])
-print('police : ', inverted_index['police'])
-request_andNot = 'pragmatics AND NOT pragmatics AND police'
-request_orNot = 'NOT mechanical OR NOT pragmatics AND NOT pragmatics AND police'
-#print(request_orNot)
-#print(boolean_research(request_orNot))
-print(request_andNot)
-print(boolean_research(request_andNot))
-
-print(boolean_research('NOT police AND police AND police'))
-
+request = "police AND NOT police"
+print(request, boolean_research(request))
+print("***************************")
+request_or = "police OR NOT police"
+print(request_or, boolean_research(request_or))
+print("***************************")
+req = "police OR mechanics AND NOT police"
+print(req, boolean_research(req))
+request_complex = "police OR NOT translation OR mechanics OR physics AND NOT police"
+print("police", inverted_index["police"])
+print("translation", inverted_index["translation"])
+print("mechanics", inverted_index["mechanics"])
+print("physics", inverted_index["physics"])
+print("***************************")
+print(request_complex, boolean_research(request_complex))
