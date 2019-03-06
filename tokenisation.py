@@ -1,13 +1,13 @@
-import re
 import os
 from math import log, exp
-import pdb
 import nltk
-import numpy as np
-import matplotlib.pyplot as plt
+import pdb
+from text_processing import create_lowercase_text, tokenize, vocabulary
+from utils import create_inverted_index, compute_linear_reg, plot_frequecy_distribution
 
-path = "./Data/CACM/cacm.all"
-reg = '\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]|\;|\?|\!|\''
+# path = os.getcwd()+'\\Data\\CACM\\cacm.all'
+path = "./Data/CACM/cacm.all"a
+reg='\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]|\;|\?|\!|\''
 
 '''Methods'''
 
@@ -80,31 +80,25 @@ def ComputeLinearReg(lowercase_string_of_interesting_data):
     K = exp(1 / 2 * (linear_reg[1][1] + linear_reg[0][1] - beta * (linear_reg[1][0] + linear_reg[0][0])))
     return beta, K
 
-
-''' Q1'''
-
-lowercase_string_of_interesting_data = create_lowercase_text(path)
-tokenized_text = tokenize(lowercase_string_of_interesting_data)
-
-vocab = vocabulary(tokenized_text)
+lowercase_text = create_lowercase_text(path)
+tokenized_text = tokenize(lowercase_text)
 
 '''Q2'''
 
-print("Le vocabulaire de l'ensemble a %i éléments distincts." % (len(vocab)))
+vocab=vocabulary(tokenized_text)
+print("Le vocabulaire de l'ensemble a %i éléments distincts." %(len(vocab)))
 
 '''Q3'''
 
-beta_reg = None
-K_reg = None
-beta_reg, K_reg = ComputeLinearReg(lowercase_string_of_interesting_data)
-print("La loi de Heap : b = %f,  K = %f" % (beta_reg, K_reg))
+beta_reg, K_reg = compute_linear_reg(lowercase_text)
+print("La loi de Heap : b = %f,  K = %f" %(beta_reg, K_reg))
 
 '''Q4'''
 
 print("Pour un million : %f " % (K_reg * ((10 ** 6) ** beta_reg)))
 
 '''Q5'''
-#
+
 # word_freq = sorted([tokenized_text.count(w) for w in vocab], reverse=True)    #frequency
 # x = [i+1 for i in range(len(word_freq))]  #rank
 # print("Drawing graph")
@@ -129,6 +123,16 @@ print("Pour un million : %f " % (K_reg * ((10 ** 6) ** beta_reg)))
 inverted_index = create_inverted_index(path)
 # print('inverted_index[\'was\'] : ', inverted_index['was'])
 # print('inverted_index[\'police\'] : ', inverted_index['police'])
+#plot_frequecy_distribution(tokenized_text)
+
+''' index '''
+'''     Done pour CACM en un seul bloc (en mémoire). Il faut trouver une solution pour CS276.
+'''
+print('Index : ')
+inverted_index = create_inverted_index(path)
+print('inverted_index[\'complex\'] : ', inverted_index['complex'])
+print('inverted_index[\'effective\'] : ', inverted_index['effective'])
+
 
 ''' 2.2.1 Index booléen '''
 
@@ -136,36 +140,6 @@ inverted_index = create_inverted_index(path)
 def intersection(lst1, lst2):
     lst3 = [value for value in lst1 if value in lst2]
     return lst3
-
-
-def boolean_research_V0(client_request):
-    request = tokenize(client_request)
-    documents = []
-    forbidden_docs = []
-    if (len(request) == 1):
-        documents = inverted_index[request[0]]
-    else:
-        for i in range(len(request)):
-            if (request[i] in ['AND', 'OR', 'NOT']):
-                pass
-            else:
-                if (i == 0):
-                    documents += inverted_index[request[i]]
-                else:
-                    previous_term = request[i - 1]
-                    if previous_term == 'OR':
-                        documents += inverted_index[request[i]]
-                    elif previous_term == 'AND':
-                        documents = intersection(documents, inverted_index[request[i]])
-                    elif previous_term == 'NOT':
-                        if request[i - 2] == 'AND':
-                            forbidden_docs += inverted_index[request[i]]
-    if len(forbidden_docs) > 0:
-        for docId in documents:
-            if docId in forbidden_docs:
-                documents.remove(docId)
-    return documents
-
 
 def get_all_doc_Id(path):
     file_obj = open(path, 'r')
@@ -177,8 +151,7 @@ def get_all_doc_Id(path):
                 listDocId.append(int(line[3:]))
     return listDocId
 
-
-def boolean_research(client_request, path_client=path):
+def boolean_research(client_request, path_client = path):
     all_doc_id = get_all_doc_Id(path_client)
     request = tokenize(client_request)
     final_docs = []
@@ -255,3 +228,13 @@ def boolean_research(client_request, path_client=path):
             request.pop(index_treated[1])
         final_docs = documents
     return final_docs
+
+'''example of request'''
+
+print('mechanical : ',inverted_index['mechanical'])
+print('pragmatics :', inverted_index['pragmatics'])
+print('police : ', inverted_index['police'])
+request_andNot = 'pragmatics AND NOT pragmatics AND police'
+print(request_andNot)
+print(boolean_research(request_andNot))
+
