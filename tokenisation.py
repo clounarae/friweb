@@ -5,8 +5,7 @@ import pdb
 from text_processing import create_lowercase_text, tokenize, vocabulary
 from utils import create_inverted_index, compute_linear_reg, plot_frequecy_distribution
 
-# path = os.getcwd()+'\\Data\\CACM\\cacm.all'
-path = "./Data/CACM/cacm.all"a
+path = "./Data/CACM/cacm.all"
 reg='\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]|\;|\?|\!|\''
 
 '''Methods'''
