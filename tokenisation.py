@@ -1,6 +1,7 @@
 import re
 import os
 from math import log, exp
+import pdb
 import nltk
 import numpy as np
 import matplotlib.pyplot as plt
@@ -177,9 +178,6 @@ def get_all_doc_Id(path):
     return listDocId
 
 
-import pdb
-
-
 def boolean_research(client_request, path_client=path):
     all_doc_id = get_all_doc_Id(path_client)
     request = tokenize(client_request)
@@ -215,10 +213,7 @@ def boolean_research(client_request, path_client=path):
             else:
                 documents.extend(element for element in doc_treated if element not in documents)
         if len(forbidden_doc) > 0:  # Removing forbidden docs from results
-            if len(documents) == 0:
-                documents = all_doc_id.copy() #??? pourquoi ?
-
-            for docId in documents:
+            for docId in documents.copy():
                 if docId in forbidden_doc:
                     documents.remove(docId)
         request.insert(index_treated[0], documents)
@@ -260,19 +255,3 @@ def boolean_research(client_request, path_client=path):
             request.pop(index_treated[1])
         final_docs = documents
     return final_docs
-
-request = "police AND NOT police"
-print(request, boolean_research(request))
-print("***************************")
-request_or = "police OR NOT police"
-print(request_or, boolean_research(request_or))
-print("***************************")
-req = "police OR mechanics AND NOT police"
-print(req, boolean_research(req))
-request_complex = "police OR NOT translation OR mechanics OR physics AND NOT police"
-print("police", inverted_index["police"])
-print("translation", inverted_index["translation"])
-print("mechanics", inverted_index["mechanics"])
-print("physics", inverted_index["physics"])
-print("***************************")
-print(request_complex, boolean_research(request_complex))
