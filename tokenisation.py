@@ -48,4 +48,4 @@ inverted_index = read_object(file_path+'\\inverted_index.pickle')
 docs_coordinates = read_object(file_path+'\\docs_coordinates.pickle')
 print(': = = = = = = = = = = = = = = = = = = = = = = = = = = :')
 while True:
-    print_query_result(input_query_vectorial_model(docs_coordinates, vocab, inverted_index, collection_path))
+    print_query_result(input_query_vectorial_model(docs_coordinates, vocab, inverted_index, collection_path, n_results=15))

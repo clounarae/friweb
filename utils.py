@@ -80,7 +80,7 @@ def input_query_vectorial_model(docs_coordinates, vocabulary, inverted_index, pa
     docs_coordinates[0] = np.asarray([tf_idf_weight(0, term, doc_dict, inverted_index, n_documents) for term in vocabulary])
     distance_dict = {docID : compute_cos_distance(0, docID, docs_coordinates) for docID in doc_dict.keys()}
     distance_from_query = sorted(distance_dict.items(), key=operator.itemgetter(1), reverse=True)
-    return [result[0] for result in distance_from_query[1:11]]
+    return [result[0] for result in distance_from_query[1:n_results+1]]
 
 def print_query_result(result):
     print('Les documents les plus pertinents pour votre recherche sont :')
