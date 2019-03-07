@@ -8,7 +8,8 @@ from text_processing import create_lowercase_text,\
 from utils import create_inverted_index,\
                   compute_linear_reg,\
                   plot_frequecy_distribution,\
-                  intersection
+                  intersection,\
+                  tf_idf_weight
 from search_methods import boolean_search,\
                            input_query_vectorial_model,\
                            print_query_result
@@ -42,7 +43,7 @@ print("Pour un million : %f " % (K_reg * ((10 ** 6) ** beta_reg)))
 tokenized_text = read_object(file_path+'/tokenized_text.pickle')
 plot = None
 while plot not in ['y','n']:
-    plot = input('Voulez-vous voir le diagramme de fréquence de la collection ? y/n')
+    plot = input('Voulez-vous voir le diagramme de fréquence de la collection ? y/n\n')
     if plot == 'y':
         plot_frequecy_distribution(tokenized_text)
 
@@ -50,7 +51,7 @@ while plot not in ['y','n']:
 
 inverted_index = read_object(file_path+'/inverted_index.pickle')
 
-docs_coordinates = read_object(file_path+'/docs_coordinates.pickle')
+docs_coordinates_tf_idf = read_object(file_path+'/docs_coordinates_tf_idf.pickle')
 
 choice = None
 while choice != 'q':
@@ -60,9 +61,15 @@ while choice != 'q':
     ''' 2.2.1 Index booléen '''
 
     if choice == 'b':
-        print_query_result(boolean_search(input('Faites une recherche booléenne : '), inverted_index, collection_path))
+        print_query_result(boolean_search(input('Faites une recherche booléenne : '), inverted_index, collection_path, n_results=15))
 
     ''' 2.2.2 Méthode vectorielle '''
 
     if choice == 'v':
-        print_query_result(input_query_vectorial_model(docs_coordinates, vocab, inverted_index, collection_path, n_results=15))
+        function_choice = "tf_idf"
+        docs_coordinates = None
+        # Choix de la fonction de pondération pour la recherche vectorielle
+        if function_choice == "tf_idf":
+            weight_function = tf_idf_weight
+            docs_coordinates = docs_coordinates_tf_idf
+        print_query_result(input_query_vectorial_model(docs_coordinates, vocab, inverted_index, collection_path, weight_function, n_results=15))

@@ -68,18 +68,21 @@ def tf_idf_weight(docID, term, doc_dict, inverted_index, n_documents):
     return inverted_document_freq(term, inverted_index, n_documents) * log_term_freq_in_doc(term, docID, doc_dict)
 
 
-def compute_docs_coordinates(vocabulary, inverted_index, path):
+def compute_cos_similarity(doc1, doc2, docs_coordinates):
+    if np.linalg.norm(docs_coordinates[doc1]) == 0 or np.linalg.norm(docs_coordinates[doc2]) == 0:
+        return 0
+    else: 
+        return (np.dot(docs_coordinates[doc1], docs_coordinates[doc2]) /
+               (np.linalg.norm(docs_coordinates[doc1]) * np.linalg.norm(docs_coordinates[doc2])))
+
+
+def compute_docs_coordinates(vocabulary, inverted_index, path, weight_function):
     docs_coordinates = {}
     doc_dict = split_documents(path)
     n_documents = get_number_of_documents(path)
     for docID in doc_dict.keys():
-        docs_coordinates[docID] = np.asarray([tf_idf_weight(docID, term, doc_dict, inverted_index, n_documents) for term in vocabulary])
+        docs_coordinates[docID] = np.asarray([weight_function(docID, term, doc_dict, inverted_index, n_documents) for term in vocabulary])
     return docs_coordinates
-
-
-def compute_cos_distance(doc1, doc2, docs_coordinates):
-    return (np.dot(docs_coordinates[doc1], docs_coordinates[doc2]) /
-           (np.linalg.norm(docs_coordinates[doc1]) * np.linalg.norm(docs_coordinates[doc2])))
 
 
 def compute_linear_reg(lowercase_string_of_interesting_data):
