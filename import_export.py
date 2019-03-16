@@ -2,13 +2,14 @@ import pickle
 import os
 from utils import compute_docs_coordinates,\
                   create_inverted_index,\
-                  tf_idf_weight
+                  tf_idf_weight,\
+                  normalized_freq_weight
 from text_processing import vocabulary,\
                             create_lowercase_text,\
                             tokenize
 
 def write_docs_coordinates(vocab, inverted_index, collection_path, weight_function, file_path):
-    print('Exporting document vectorial representation for vectorial model...')
+    print('Exporting document vectorial representation for vectorial model with {} weigh function...'.format(weight_function.__name__))
     docs_coordinates = compute_docs_coordinates(vocab, inverted_index, collection_path, weight_function)
     file = open(file_path, 'wb')
     pickle.dump(docs_coordinates, file, protocol=pickle.HIGHEST_PROTOCOL)
@@ -58,4 +59,6 @@ if __name__ == '__main__':
     vocab = read_object(file_path + '/vocabulary.pickle')
     inverted_index = read_object(file_path + '/inverted_index.pickle')
     write_docs_coordinates(vocab, inverted_index, collection_path, tf_idf_weight, file_path+'/docs_coordinates_tf_idf.pickle')
+    write_docs_coordinates(vocab, inverted_index, collection_path, normalized_freq_weight, file_path+'/docs_coordinates_normalized_freq_weight.pickle')
+
     print('All writing done!')

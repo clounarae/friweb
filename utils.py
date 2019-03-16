@@ -68,6 +68,11 @@ def tf_idf_weight(docID, term, doc_dict, inverted_index, n_documents):
     return inverted_document_freq(term, inverted_index, n_documents) * log_term_freq_in_doc(term, docID, doc_dict)
 
 
+def normalized_freq_weight(term, docID, doc_dict, inverted_index, n_documents):
+    max_term_freq = max([log_term_freq_in_doc(t, docID, doc_dict) for t in tokenize(doc_dict[docID])])
+    return log_term_freq_in_doc(term, docID, doc_dict) / max_term_freq
+
+
 def compute_cos_similarity(doc1, doc2, docs_coordinates):
     if np.linalg.norm(docs_coordinates[doc1]) == 0 or np.linalg.norm(docs_coordinates[doc2]) == 0:
         return 0

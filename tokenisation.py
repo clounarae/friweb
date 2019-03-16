@@ -9,7 +9,8 @@ from utils import create_inverted_index,\
                   compute_linear_reg,\
                   plot_frequecy_distribution,\
                   intersection,\
-                  tf_idf_weight
+                  tf_idf_weight,\
+                  normalized_freq_weight
 from search_methods import boolean_search,\
                            input_query_vectorial_model,\
                            print_query_result
@@ -51,8 +52,6 @@ while plot not in ['y','n']:
 
 inverted_index = read_object(file_path+'/inverted_index.pickle')
 
-docs_coordinates_tf_idf = read_object(file_path+'/docs_coordinates_tf_idf.pickle')
-
 choice = None
 while choice != 'q':
     print(': = = = = = = = = = = = = = = = = = = = = = = = = = = :')
@@ -71,5 +70,8 @@ while choice != 'q':
         # Choix de la fonction de pondération pour la recherche vectorielle
         if function_choice == "tf_idf":
             weight_function = tf_idf_weight
-            docs_coordinates = docs_coordinates_tf_idf
+            docs_coordinates = read_object(file_path+'/docs_coordinates_tf_idf.pickle')
+        elif function_choice == "normalized_freq_weight":
+            weight_function = normalized_freq_weight
+            docs_coordinates = read_object(file_path+'/docs_coordinates_normalized_freq_weight.pickle')
         print_query_result(input_query_vectorial_model(docs_coordinates, vocab, inverted_index, collection_path, weight_function, n_results=15))
