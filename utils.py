@@ -1,6 +1,7 @@
 from math import log, log10, exp
 import numpy as np
 import matplotlib.pyplot as plt
+import operator
 from text_processing import create_lowercase_text, tokenize, vocabulary, select_text_from_doc_part, \
     get_number_of_documents
 
@@ -54,17 +55,34 @@ def log_term_freq_in_doc(term, docID, doc_dict):
         return 0
 
 
-def inverted_document_freq(term, inverted_index, path):
+def inverted_document_freq(term, inverted_index, n_documents):
     n_docs_with_term = 0
     try:
         n_docs_with_term = len(inverted_index[term])
     except:
-        return 0  # terme n'existe pas dans la collection
-    return log10(get_number_of_documents(path) / n_docs_with_term)
+        return 0      #terme n'existe pas dans la collection
+    return log10(n_documents / n_docs_with_term)
 
 
-def tf_idf_weight(docID, term, doc_dict, inverted_index, path):
-    return inverted_document_freq(term, inverted_index, path) * log_term_freq_in_doc(term, docID, doc_dict)
+def tf_idf_weight(docID, term, doc_dict, inverted_index, n_documents):
+    return inverted_document_freq(term, inverted_index, n_documents) * log_term_freq_in_doc(term, docID, doc_dict)
+
+
+def compute_cos_similarity(doc1, doc2, docs_coordinates):
+    if np.linalg.norm(docs_coordinates[doc1]) == 0 or np.linalg.norm(docs_coordinates[doc2]) == 0:
+        return 0
+    else: 
+        return (np.dot(docs_coordinates[doc1], docs_coordinates[doc2]) /
+               (np.linalg.norm(docs_coordinates[doc1]) * np.linalg.norm(docs_coordinates[doc2])))
+
+
+def compute_docs_coordinates(vocabulary, inverted_index, path, weight_function):
+    docs_coordinates = {}
+    doc_dict = split_documents(path)
+    n_documents = get_number_of_documents(path)
+    for docID in doc_dict.keys():
+        docs_coordinates[docID] = np.asarray([weight_function(docID, term, doc_dict, inverted_index, n_documents) for term in vocabulary])
+    return docs_coordinates
 
 
 def compute_linear_reg(lowercase_string_of_interesting_data):
@@ -99,3 +117,7 @@ def plot_frequecy_distribution(tokenized_text):
     plt.title("log(Frequency) depending on log(rank)")
     plt.show()
     print("process finished successfully !")
+
+def intersection(lst1, lst2):
+    lst3 = [value for value in lst1 if value in lst2]
+    return lst3

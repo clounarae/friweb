@@ -40,3 +40,13 @@ def get_number_of_documents(path):
         if line[:2] == '.I':
             N += 1
     return N
+
+def get_all_doc_id(path):
+    file_obj = open(path, 'r')
+    lines = file_obj.readlines()
+    listDocId = []
+    for (i, line) in enumerate(lines):
+        if line[0] == '.':
+            if line[1] == 'I':
+                listDocId.append(int(line[3:]))
+    return listDocId
