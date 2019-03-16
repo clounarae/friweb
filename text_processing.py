@@ -1,6 +1,8 @@
 import re
+from nltk.stem import PorterStemmer
 
 reg='\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]|\;|\?|\!|\'|\t'
+ps = PorterStemmer() # Word stemmer, permits to transform a word into its root
 
 def create_lowercase_text(path):
     file_obj = open(path, 'r')
@@ -25,11 +27,21 @@ def select_text_from_doc_part(i, lines):
     return text_block.lower()
 
 def tokenize(text):
+    '''
+    Creates tokens in the format of stemmed words from the text given, after removing all punctuation
+    :param text: text to tokenize
+    :return: list of stemmed words
+    '''
     splitting = re.split(reg, text)
-    splitting[:] = [x for x in splitting if x != '']
+    splitting[:] = [ps.stem(x) for x in splitting if x != '']
     return splitting
 
 def vocabulary(tokens):
+    '''
+    vocabulary of the stemmed text => We show only the root words
+    :param tokens: tokens of the text
+    :return: set of all the root words
+    '''
     return sorted(set(tokens))
 
 def get_number_of_documents(path):
