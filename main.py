@@ -52,6 +52,7 @@ while plot not in ['y','n']:
 inverted_index = read_object(file_path+'/inverted_index.pickle')
 
 docs_coordinates_tf_idf = read_object(file_path+'/docs_coordinates_tf_idf.pickle')
+doc_dict = read_object(file_path+'/doc_dict.pickle')
 
 choice = None
 while choice != 'q':
@@ -61,7 +62,7 @@ while choice != 'q':
     ''' 2.2.1 Index booléen '''
 
     if choice == 'b':
-        print_query_result(boolean_search(input('Faites une recherche booléenne : '), inverted_index, collection_path, n_results=15))
+        print_query_result(boolean_search(input('Faites une recherche booléenne : '), inverted_index, collection_path, n_results=15), doc_dict)
 
     ''' 2.2.2 Méthode vectorielle '''
 
@@ -72,4 +73,4 @@ while choice != 'q':
         if function_choice == "tf_idf":
             weight_function = tf_idf_weight
             docs_coordinates = docs_coordinates_tf_idf
-        print_query_result(input_query_vectorial_model(docs_coordinates, vocab, inverted_index, collection_path, weight_function, n_results=15))
+        print_query_result(input_query_vectorial_model(docs_coordinates, vocab, inverted_index, collection_path, weight_function, n_results=15), doc_dict)

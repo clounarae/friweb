@@ -2,7 +2,7 @@ import pickle
 import os
 from utils import compute_docs_coordinates,\
                   create_inverted_index,\
-                  tf_idf_weight
+                  tf_idf_weight, split_documents
 from text_processing import vocabulary,\
                             create_lowercase_text,\
                             tokenize
@@ -42,6 +42,13 @@ def write_lowercase_text(collection_path, file_path):
     pickle.dump(lowercase_text, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
 
+def write_doc_dict(collection_path, file_path):
+    print('Exporting document dictionary...')
+    doc_dict = split_documents(collection_path)
+    file=open(file_path, 'w+b')
+    pickle.dump(doc_dict, file, protocol=pickle.HIGHEST_PROTOCOL)
+    file.close()
+
 def read_object(file_path):
     file = open(file_path, 'rb')
     result = pickle.load(file)
@@ -55,6 +62,7 @@ if __name__ == '__main__':
     write_tokenized_text(collection_path, file_path+'/tokenized_text.pickle')
     write_vocabulary(collection_path, file_path+'/vocabulary.pickle')
     write_inverted_index(collection_path, file_path+'/inverted_index.pickle')
+    write_doc_dict(collection_path, file_path+'/doc_dict.pickle')
     vocab = read_object(file_path + '/vocabulary.pickle')
     inverted_index = read_object(file_path + '/inverted_index.pickle')
     write_docs_coordinates(vocab, inverted_index, collection_path, tf_idf_weight, file_path+'/docs_coordinates_tf_idf.pickle')
