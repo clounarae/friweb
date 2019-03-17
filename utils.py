@@ -2,6 +2,10 @@ from math import log, log10, exp
 import numpy as np
 import matplotlib.pyplot as plt
 import operator
+import os
+import tracemalloc
+import linecache
+import time
 from text_processing import create_lowercase_text, tokenize, vocabulary, select_text_from_doc_part, \
     get_number_of_documents
 
@@ -10,6 +14,8 @@ def create_inverted_index(path):
     '''
     Create the inverted index of the collection along the path
     '''
+    tracemalloc.start()
+    start_time = time.clock()
     file_obj = open(path, 'r')
     lines = file_obj.readlines()
     inverted_index = {}
@@ -26,6 +32,10 @@ def create_inverted_index(path):
                         inverted_index[word] = [docID]
     for word in inverted_index.keys():
         inverted_index[word] = sorted(list(set(inverted_index[word])))
+    snapshot = tracemalloc.take_snapshot()
+    print('inverted index took {} s to be created'.format(time.clock()-start_time))
+    print("memory stats for inverted index")
+    display_top(snapshot)
     return inverted_index
 
 
@@ -106,11 +116,13 @@ def compute_docs_coordinates(vocabulary, inverted_index, path, weight_function):
     '''
     Compute the components for all the documents along the axes (one axis for each term of the collection) using the weight function
     '''
+    start_time = time.clock()
     docs_coordinates = {}
     doc_dict = split_documents(path)
     n_documents = get_number_of_documents(path)
     for docID in doc_dict.keys():
         docs_coordinates[docID] = np.asarray([weight_function(docID, term, doc_dict, inverted_index, n_documents) for term in vocabulary])
+    print('creating docs coordinates for vectorial model took {} s'.format(time.clock()-start_time))
     return docs_coordinates
 
 
@@ -159,3 +171,18 @@ def intersection(lst1, lst2):
     '''
     lst3 = [value for value in lst1 if value in lst2]
     return lst3
+
+def display_top(snapshot, key_type='lineno'):
+    '''
+    display total of memory resources used by a program
+    :param snapshot: tracemalloc at the time t
+    :param key_type:
+    :return:
+    '''
+    snapshot = snapshot.filter_traces((
+        tracemalloc.Filter(False, "<frozen importlib._bootstrap>"),
+        tracemalloc.Filter(False, "<unknown>"),
+    ))
+    top_stats = snapshot.statistics(key_type)
+    total = sum(stat.size for stat in top_stats)
+    print("Total allocated size: %.1f KiB" % (total / 1024))
