@@ -17,7 +17,8 @@ Les réponses aux questions s'affichent dans l'ordre quand le programme est lanc
  3. Pour un million de token, on trouve une taille de vocabulaire de **29092** éléments
  4. On peut tracer le diagramme de fréquence de la collection mais nous déconseillons de le faire si ce n'est pas nécessaire car cela prend du temps. 
 
-On peut ensuite choisir dans le script si on veut choisir une methode booléenne de recherche, en tapant *b* ou une méthode vectorielle en tapant *v*.
+On peut ensuite choisir dans le script si on veut choisir une méthode booléenne de recherche, en tapant *b* ou une méthode vectorielle en tapant *v*.
+La méthode vectorielle prend en compte la pertinence lors du classement des documents, ce qui n'est pas le cas pour la recherche booléenne.
 
 
 ### Description des fichiers 1
