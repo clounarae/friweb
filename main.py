@@ -80,4 +80,4 @@ while choice != 'q':
     ''' 2.2.2 Méthode vectorielle '''
 
     if choice == 'v':
-        print_query_result(input_query_vectorial_model(docs_coordinates_tf_idf, vocab, inverted_index, collection_path, tf_idf_weight, n_results=15))
+        print_query_result(input_query_vectorial_model(docs_coordinates_tf_idf, vocab, inverted_index, collection_path, tf_idf_weight, n_results=15), doc_dict)

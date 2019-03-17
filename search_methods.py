@@ -10,16 +10,16 @@ from text_processing import tokenize,\
 import time
 
 
-def print_query_result(list_of_docs):
+def print_query_result(list_of_docs, doc_dict):
     '''
     Print the result of a querry in well shaped format
     :param: list_of_docs: list of document IDs 
     '''
-    if len(result)==0:
+    if len(list_of_docs)==0:
         print('No documents found')
     else:
         print('Les documents les plus pertinents pour votre recherche sont :')
-        for (i,x) in enumerate(result):
+        for (i,x) in enumerate(list_of_docs):
             words = ''
             for w in doc_dict[x][:7]:
                 words+= ' '+ w
@@ -29,17 +29,18 @@ def input_query_vectorial_model(docs_coordinates, vocabulary, inverted_index, pa
     '''
     Give the n_results closest document IDs to the user's querry based on the vectorial search model
     '''
-    start_time = time.clock()
     doc_dict = split_documents(path)
     n_documents = get_number_of_documents(path)
     request_id = 0
-    doc_dict[request_id] = tokenize(input('Faites une recherche vectorielle : ').lower())  #On demande une requête et on fait comme si elle était le document n°0
+    user_input = input('Faites une recherche vectorielle : ')
+    start_time = time.clock()
+    doc_dict[request_id] = tokenize(user_input.lower())  #On demande une requête et on fait comme si elle était le document n°0
     docs_coordinates[request_id] = np.asarray([weight_function(request_id, term, doc_dict, inverted_index, n_documents) for term in vocabulary])
     similarity_dict = {docID : compute_cos_similarity(request_id, docID, docs_coordinates) for docID in doc_dict.keys()}
     similarity_to_query = sorted(similarity_dict.items(), key=operator.itemgetter(1), reverse=True)
     results = [result[0] for result in similarity_to_query[1:n_results+1] if result[1] > 0]
     elapsed_time = time.clock() - start_time
-    print('vectorial search took {} s to run the query'.format(elapsed_time))
+    print('vectorial search took {:.2f} s to run the query'.format(elapsed_time))
     return results
 
 
@@ -125,5 +126,5 @@ def boolean_search(client_request, inverted_index, collection_path, n_results=10
             request.pop(index_treated[1])
         final_docs = documents
         time_elapsed =  time.clock()-time_start
-        print('boolean search took {} s to run the query'.format(time_elapsed))
+        print('boolean search took {:.2f} s to run the query'.format(time_elapsed))
     return final_docs[:n_results]
