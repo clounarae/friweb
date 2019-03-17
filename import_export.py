@@ -10,35 +10,35 @@ from text_processing import vocabulary,\
 def write_docs_coordinates(vocab, inverted_index, collection_path, weight_function, file_path):
     print('Exporting document vectorial representation for vectorial model...')
     docs_coordinates = compute_docs_coordinates(vocab, inverted_index, collection_path, weight_function)
-    file = open(file_path, 'wb')
+    file = open(file_path, 'w+b')
     pickle.dump(docs_coordinates, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
 
 def write_inverted_index(collection_path, file_path):
     print('Exporting inverted index...')
     inverted_index = create_inverted_index(collection_path)
-    file = open(file_path, 'wb')
+    file = open(file_path, 'w+b')
     pickle.dump(inverted_index, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
 
 def write_vocabulary(collection_path, file_path):
     print('Exporting vocabulary...')
     vocab = vocabulary(tokenize(create_lowercase_text(collection_path)))
-    file = open(file_path, 'wb')
+    file = open(file_path, 'w+b')
     pickle.dump(vocab, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
 
 def write_tokenized_text(collection_path, file_path):
     print('Exporting tokenized text...')
     tokenized_text = tokenize(create_lowercase_text(collection_path))
-    file = open(file_path, 'wb')
+    file = open(file_path, 'w+b')
     pickle.dump(tokenized_text, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
 
 def write_lowercase_text(collection_path, file_path):
     print('Exporting lowercase text...')
     lowercase_text = create_lowercase_text(collection_path)
-    file = open(file_path, 'wb')
+    file = open(file_path, 'w+b')
     pickle.dump(lowercase_text, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
 
