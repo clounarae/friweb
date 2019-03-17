@@ -69,7 +69,11 @@ def tf_idf_weight(docID, term, doc_dict, inverted_index, n_documents):
 
 
 def normalized_freq_weight(term, docID, doc_dict, inverted_index, n_documents):
-    max_term_freq = max([log_term_freq_in_doc(t, docID, doc_dict) for t in tokenize(doc_dict[docID])])
+    term_freq_list = []
+    for t in tokenize(doc_dict[docID]):
+        term_freq_list.append(log_term_freq_in_doc(t, docID, doc_dict))
+    max_term_freq = max(term_freq_list)
+    print(term_freq_list)
     return log_term_freq_in_doc(term, docID, doc_dict) / max_term_freq
 
 
@@ -81,12 +85,20 @@ def compute_cos_similarity(doc1, doc2, docs_coordinates):
                (np.linalg.norm(docs_coordinates[doc1]) * np.linalg.norm(docs_coordinates[doc2])))
 
 
-def compute_docs_coordinates(vocabulary, inverted_index, path, weight_function):
+def compute_doc_coordinates_tf_idf(vocabulary, inverted_index, path):
     docs_coordinates = {}
     doc_dict = split_documents(path)
     n_documents = get_number_of_documents(path)
     for docID in doc_dict.keys():
-        docs_coordinates[docID] = np.asarray([weight_function(docID, term, doc_dict, inverted_index, n_documents) for term in vocabulary])
+        docs_coordinates[docID] = np.asarray([tf_idf_weight(docID, term, doc_dict, inverted_index, n_documents) for term in vocabulary])
+    return docs_coordinates
+
+def compute_doc_coordinates_normalized_freq(vocabulary, inverted_index, path):
+    docs_coordinates = {}
+    doc_dict = split_documents(path)
+    n_documents = get_number_of_documents(path)
+    for docID in doc_dict.keys():
+        docs_coordinates[docID] = np.asarray([normalized_freq_weight(docID, term, doc_dict, inverted_index, n_documents) for term in vocabulary])
     return docs_coordinates
 
 

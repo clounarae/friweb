@@ -1,6 +1,7 @@
 import pickle
 import os
-from utils import compute_docs_coordinates,\
+from utils import compute_doc_coordinates_tf_idf,\
+                  compute_doc_coordinates_normalized_freq,\
                   create_inverted_index,\
                   tf_idf_weight,\
                   normalized_freq_weight
@@ -8,12 +9,21 @@ from text_processing import vocabulary,\
                             create_lowercase_text,\
                             tokenize
 
-def write_docs_coordinates(vocab, inverted_index, collection_path, weight_function, file_path):
-    print('Exporting document vectorial representation for vectorial model with {} weigh function...'.format(weight_function.__name__))
-    docs_coordinates = compute_docs_coordinates(vocab, inverted_index, collection_path, weight_function)
+def write_doc_coordinates_tf_idf(vocab, inverted_index, collection_path, file_path):
+    print('Exporting document vectorial representation for vectorial model with tf-idf weigh function...')
+    docs_coordinates = compute_doc_coordinates_tf_idf(vocab, inverted_index, collection_path)
     file = open(file_path, 'wb')
     pickle.dump(docs_coordinates, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
+    print('Export done.')
+
+def write_doc_coordinates_normalized_freq(vocab, inverted_index, collection_path, file_path):
+    print('Exporting document vectorial representation for vectorial model with normalized frequency weigh function...')
+    docs_coordinates = compute_doc_coordinates_normalized_freq(vocab, inverted_index, collection_path)
+    file = open(file_path, 'wb')
+    pickle.dump(docs_coordinates, file, protocol=pickle.HIGHEST_PROTOCOL)
+    file.close()
+    print('Export done.')
 
 def write_inverted_index(collection_path, file_path):
     print('Exporting inverted index...')
@@ -21,6 +31,7 @@ def write_inverted_index(collection_path, file_path):
     file = open(file_path, 'wb')
     pickle.dump(inverted_index, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
+    print('Export done.')
 
 def write_vocabulary(collection_path, file_path):
     print('Exporting vocabulary...')
@@ -28,6 +39,7 @@ def write_vocabulary(collection_path, file_path):
     file = open(file_path, 'wb')
     pickle.dump(vocab, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
+    print('Export done.')
 
 def write_tokenized_text(collection_path, file_path):
     print('Exporting tokenized text...')
@@ -35,6 +47,7 @@ def write_tokenized_text(collection_path, file_path):
     file = open(file_path, 'wb')
     pickle.dump(tokenized_text, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
+    print('Export done.')
 
 def write_lowercase_text(collection_path, file_path):
     print('Exporting lowercase text...')
@@ -42,6 +55,7 @@ def write_lowercase_text(collection_path, file_path):
     file = open(file_path, 'wb')
     pickle.dump(lowercase_text, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
+    print('Export done.')
 
 def read_object(file_path):
     file = open(file_path, 'rb')
@@ -58,7 +72,7 @@ if __name__ == '__main__':
     write_inverted_index(collection_path, file_path+'/inverted_index.pickle')
     vocab = read_object(file_path + '/vocabulary.pickle')
     inverted_index = read_object(file_path + '/inverted_index.pickle')
-    write_docs_coordinates(vocab, inverted_index, collection_path, tf_idf_weight, file_path+'/docs_coordinates_tf_idf.pickle')
-    write_docs_coordinates(vocab, inverted_index, collection_path, normalized_freq_weight, file_path+'/docs_coordinates_normalized_freq_weight.pickle')
+    #write_doc_coordinates_tf_idf(vocab, inverted_index, collection_path, file_path+'/docs_coordinates_tf_idf.pickle')
+    write_doc_coordinates_normalized_freq(vocab, inverted_index, collection_path, file_path+'/docs_coordinates_normalized_freq_weight.pickle')
 
     print('All writing done!')
