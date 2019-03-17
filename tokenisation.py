@@ -62,10 +62,6 @@ while plot not in ['y','n']:
 # Read the pickle dump that contains the inverted index for CACM
 inverted_index = read_object(file_path+'/inverted_index.pickle')
 
-
-docs_coordinates_tf_idf = read_object(file_path+'/docs_coordinates_tf_idf.pickle')
-doc_dict = read_object(file_path+'/doc_dict.pickle')
-
 choice = None
 while choice != 'q':
     # Choose a search method
@@ -75,9 +71,18 @@ while choice != 'q':
     ''' 2.2.1 Méthode booléenne '''
 
     if choice == 'b':
-        print_query_result(boolean_search(input('Faites une recherche booléenne : '), inverted_index, collection_path, n_results=15), doc_dict)
+        print_query_result(boolean_search(input('Faites une recherche booléenne : '), inverted_index, collection_path, n_results=15))
 
     ''' 2.2.2 Méthode vectorielle '''
 
     if choice == 'v':
-        print_query_result(input_query_vectorial_model(docs_coordinates_tf_idf, vocab, inverted_index, collection_path, tf_idf_weight, n_results=15))
+        function_choice = "tf_idf"
+        docs_coordinates = None
+        # Choix de la fonction de pondération pour la recherche vectorielle
+        if function_choice == "tf_idf":
+            weight_function = tf_idf_weight
+            docs_coordinates = read_object(file_path+'/docs_coordinates_tf_idf.pickle')
+        elif function_choice == "normalized_freq_weight":
+            weight_function = normalized_freq_weight
+            docs_coordinates = read_object(file_path+'/docs_coordinates_normalized_freq_weight.pickle')
+        print_query_result(input_query_vectorial_model(docs_coordinates, vocab, inverted_index, collection_path, weight_function, n_results=15))

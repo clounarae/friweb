@@ -8,7 +8,7 @@ from text_processing import vocabulary,\
                             tokenize
 
 def write_docs_coordinates(vocab, inverted_index, collection_path, weight_function, file_path):
-    print('Exporting document vectorial representation for vectorial model...')
+    print('Exporting document vectorial representation for vectorial model with {} weigh function...'.format(weight_function.__name__))
     docs_coordinates = compute_docs_coordinates(vocab, inverted_index, collection_path, weight_function)
     file = open(file_path, 'w+b')
     pickle.dump(docs_coordinates, file, protocol=pickle.HIGHEST_PROTOCOL)
@@ -72,6 +72,5 @@ if __name__ == '__main__':
     write_doc_dict(collection_path, file_path+'/doc_dict.pickle')
     vocab = read_object(file_path + '/vocabulary.pickle')
     inverted_index = read_object(file_path + '/inverted_index.pickle')
-    write_docs_coordinates(vocab, inverted_index, collection_path, tf_idf_weight,
-                           file_path + '/docs_coordinates_tf_idf.pickle')
+    write_docs_coordinates(vocab, inverted_index, collection_path, tf_idf_weight, file_path+'/docs_coordinates_tf_idf.pickle')
     print('All writing done!')

@@ -10,7 +10,11 @@ from text_processing import tokenize,\
 import time
 
 
-def print_query_result(result, doc_dict):
+def print_query_result(list_of_docs):
+    '''
+    Print the result of a querry in well shaped format
+    :param: list_of_docs: list of document IDs 
+    '''
     if len(result)==0:
         print('No documents found')
     else:
@@ -21,8 +25,10 @@ def print_query_result(result, doc_dict):
                 words+= ' '+ w
             print(str(i+1) +'. '+ str(x)+ ': ' + words +'...')
 
-
 def input_query_vectorial_model(docs_coordinates, vocabulary, inverted_index, path, weight_function, n_results=10):
+    '''
+    Give the n_results closest document IDs to the user's querry based on the vectorial search model
+    '''
     start_time = time.clock()
     doc_dict = split_documents(path)
     n_documents = get_number_of_documents(path)
@@ -38,6 +44,9 @@ def input_query_vectorial_model(docs_coordinates, vocabulary, inverted_index, pa
 
 
 def boolean_search(client_request, inverted_index, collection_path, n_results=10):
+    '''
+    Give n_results document IDs corresponding to the user's querry based on the boolean search model
+    '''
     time_start = time.clock()
     all_doc_id = get_all_doc_id(collection_path)
     request = tokenize(client_request)

@@ -5,6 +5,9 @@ reg='\. |\.\n|,| - |\n| |: |\(|\)|\/|\{|\}|=|\"|<|>|,...,|,...;|\+|\||\[|\]|\;|\
 ps = PorterStemmer() # Word stemmer, permits to transform a word into its root
 
 def create_lowercase_text(path):
+    '''
+    Return all the text parts of a collection as a string
+    '''
     file_obj = open(path, 'r')
     lines = file_obj.readlines()
     I = None
@@ -45,6 +48,9 @@ def vocabulary(tokens):
     return sorted(set(tokens))
 
 def get_number_of_documents(path):
+    '''
+    Compute the number of documents in a given collection
+    '''
     file_obj = open(path, 'r')
     lines = file_obj.readlines()
     N = 0
@@ -54,6 +60,9 @@ def get_number_of_documents(path):
     return N
 
 def get_all_doc_id(path):
+    '''
+    Return the list of all document IDs in the collection
+    '''
     file_obj = open(path, 'r')
     lines = file_obj.readlines()
     listDocId = []
