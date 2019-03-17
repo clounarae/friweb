@@ -2,7 +2,7 @@ import pickle
 import os
 from utils import compute_docs_coordinates,\
                   create_inverted_index,\
-                  tf_idf_weight, split_documents
+                  tf_idf_weight, split_documents, display_top
 from text_processing import vocabulary,\
                             create_lowercase_text,\
                             tokenize
@@ -14,12 +14,14 @@ def write_docs_coordinates(vocab, inverted_index, collection_path, weight_functi
     pickle.dump(docs_coordinates, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
 
+
 def write_inverted_index(collection_path, file_path):
     print('Exporting inverted index...')
     inverted_index = create_inverted_index(collection_path)
     file = open(file_path, 'w+b')
     pickle.dump(inverted_index, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
+
 
 def write_vocabulary(collection_path, file_path):
     print('Exporting vocabulary...')
@@ -28,12 +30,14 @@ def write_vocabulary(collection_path, file_path):
     pickle.dump(vocab, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
 
+
 def write_tokenized_text(collection_path, file_path):
     print('Exporting tokenized text...')
     tokenized_text = tokenize(create_lowercase_text(collection_path))
     file = open(file_path, 'w+b')
     pickle.dump(tokenized_text, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
+
 
 def write_lowercase_text(collection_path, file_path):
     print('Exporting lowercase text...')
@@ -55,15 +59,19 @@ def read_object(file_path):
     file.close()
     return result
 
+
 if __name__ == '__main__':
-    collection_path = os.getcwd()+'/Data/CACM/cacm.all'
-    file_path = os.getcwd()+'/Data/CACM/computed'
-    write_lowercase_text(collection_path, file_path+'/lowercase_text.pickle')
-    write_tokenized_text(collection_path, file_path+'/tokenized_text.pickle')
-    write_vocabulary(collection_path, file_path+'/vocabulary.pickle')
-    write_inverted_index(collection_path, file_path+'/inverted_index.pickle')
+    collection_path = os.getcwd() + '/Data/CACM/cacm.all'
+    file_path = os.getcwd() + '/Data/CACM/computed'
+    if not os.path.exists(file_path):
+        os.mkdir(file_path)
+    write_lowercase_text(collection_path, file_path + '/lowercase_text.pickle')
+    write_tokenized_text(collection_path, file_path + '/tokenized_text.pickle')
+    write_vocabulary(collection_path, file_path + '/vocabulary.pickle')
+    write_inverted_index(collection_path, file_path + '/inverted_index.pickle')
     write_doc_dict(collection_path, file_path+'/doc_dict.pickle')
     vocab = read_object(file_path + '/vocabulary.pickle')
     inverted_index = read_object(file_path + '/inverted_index.pickle')
-    write_docs_coordinates(vocab, inverted_index, collection_path, tf_idf_weight, file_path+'/docs_coordinates_tf_idf.pickle')
+    write_docs_coordinates(vocab, inverted_index, collection_path, tf_idf_weight,
+                           file_path + '/docs_coordinates_tf_idf.pickle')
     print('All writing done!')
