@@ -9,13 +9,20 @@ from text_processing import tokenize,\
                             get_all_doc_id
 
 
-def print_query_result(result):
+def print_query_result(list_of_docs):
+    '''
+    Print the result of a querry in well shaped format
+    :param: list_of_docs: list of document IDs 
+    '''
     print('Les documents les plus pertinents pour votre recherche sont :')
-    for (i,x) in enumerate(result):
+    for (i,x) in enumerate(list_of_docs):
         print(str(i+1) +'. '+ str(x))
 
 
 def input_query_vectorial_model(docs_coordinates, vocabulary, inverted_index, path, weight_function, n_results=10):
+    '''
+    Give the n_results closest document IDs to the user's querry based on the vectorial search model
+    '''
     doc_dict = split_documents(path)
     n_documents = get_number_of_documents(path)
     request_id = 0
@@ -27,6 +34,9 @@ def input_query_vectorial_model(docs_coordinates, vocabulary, inverted_index, pa
 
 
 def boolean_search(client_request, inverted_index, collection_path, n_results=10):
+    '''
+    Give n_results document IDs corresponding to the user's querry based on the boolean search model
+    '''
     all_doc_id = get_all_doc_id(collection_path)
     request = tokenize(client_request)
     final_docs = []
